@@ -1,0 +1,19 @@
+import clr
+clr.AddReference('RevitServices')
+from RevitServices.Persistence import DocumentManager
+from RevitServices.Transactions import TransactionManager
+
+# Specify the file path of the Revit file you want to open
+file_path = IN[0]
+
+# Start a transaction
+TransactionManager.Instance.EnsureInTransaction(DocumentManager.Instance.CurrentDBDocument)
+
+# Open the Revit file
+doc = DocumentManager.Instance.CurrentUIApplication.Application.OpenDocumentFile(file_path)
+
+# Commit the transaction
+TransactionManager.Instance.TransactionTaskDone()
+
+# Output the document
+OUT = doc
