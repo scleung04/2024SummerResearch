@@ -2,18 +2,60 @@ import clr
 clr.AddReference('RevitServices')
 from RevitServices.Persistence import DocumentManager
 from RevitServices.Transactions import TransactionManager
+import sys
+import traceback
+import os
 
-# Specify the file path of the Revit file you want to open
-file_path = IN[0]
+# Define function to log messages to a text file
+def log_message(message):
+    try:
+        log_file_path = r"C:\Users\scleu\Downloads\2024 Summer Research\Dynamo_Revit_Log.txt"
+        with open(log_file_path, "a") as log_file:
+            log_file.write(message + "\n")
+    except Exception as e:
+        print(f"Error writing to log file: {str(e)}")
+        traceback.print_exc(file=sys.stdout)
 
-# Start a transaction
-TransactionManager.Instance.EnsureInTransaction(DocumentManager.Instance.CurrentDBDocument)
+try:
+    # Specify the file path of the Revit file you want to open
+    file_path = IN[0]
+    print("File Path:", file_path)  # Debugging: Print file path to verify it's correct
 
-# Open the Revit file
-doc = DocumentManager.Instance.CurrentUIApplication.Application.OpenDocumentFile(file_path)
+    # Start a transaction
+    TransactionManager.Instance.EnsureInTransaction(DocumentManager.Instance.CurrentDBDocument)
 
-# Commit the transaction
-TransactionManager.Instance.TransactionTaskDone()
+    # Open the Revit file
+    doc = DocumentManager.Instance.CurrentUIApplication.Application.OpenDocumentFile(file_path)
 
-# Output the document
-OUT = doc
+    # Example: Modify parameters of elements, create new elements, etc.
+    # Ensure that your update logic is within the transaction scope
+
+    # Commit the transaction
+    TransactionManager.Instance.TransactionTaskDone()
+    
+    # Log update
+    log_message("Document updated successfully")
+
+    # Output the document
+    OUT = doc
+
+except Exception as e:
+    # Print any error that occurs
+    OUT = str(e)
+    
+    # Log any errors that occur
+    log_message(f"Error: {str(e)}")
+    traceback.print_exc(file=sys.stdout)
+
+"""
+Dynamo Nodes:
+
+File Path (select file where update is desired) -> Python Script (paste above code) 
+-> (to document node) Applications.CloseDocument (from Rhythm) <- (to save node) Boolean: True
+
+Without Python (but without logging):
+
+File Path (select file where update is desired) -> Applications.OpenDocumentFile 
+-> Applications.CloseDocument <- (to save node) Boolean: True
+
+"""
