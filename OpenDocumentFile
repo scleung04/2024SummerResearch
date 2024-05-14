@@ -5,13 +5,18 @@ from RevitServices.Transactions import TransactionManager
 import sys
 import traceback
 import os
+import datetime
 
 # Define function to log messages to a text file
 def log_message(message):
     try:
+        current_time = datetime.datetime.now()
+        timestamp = current_time.strftime("%Y-%m-%d %H:%M:%S")  
+        # Format timestamp as string
         log_file_path = r"C:\Users\scleu\Downloads\2024 Summer Research\Dynamo_Revit_Log.txt"
         with open(log_file_path, "a") as log_file:
-            log_file.write(message + "\n")
+            # Append message with timestamp to log file
+            log_file.write(f"{timestamp}: {message}\n")
     except Exception as e:
         print(f"Error writing to log file: {str(e)}")
         traceback.print_exc(file=sys.stdout)
@@ -34,7 +39,7 @@ try:
     TransactionManager.Instance.TransactionTaskDone()
     
     # Log update
-    log_message("Document updated successfully")
+    log_message(file_path + " Document updated successfully")
 
     # Output the document
     OUT = doc
