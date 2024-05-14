@@ -44,4 +44,6 @@ namespace ClassLibrary1
     }
 }
 
+// Ensure Copy Local is set to False in the dependencies (Revit.API and Revit.APIUI) that should be installed
+
 // C:\\Users\\scleu\\Downloads\\Clinic_A.rvt
