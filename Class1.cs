@@ -3,16 +3,19 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.ApplicationServices;
 using System;
+using System.IO;
 
 namespace ClassLibrary1
 {
     [Transaction(TransactionMode.Manual)]
-    public class OpenRevitFileCommand : IExternalCommand
+    public class Class1 : IExternalCommand
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            // Path to the Revit file you want to open
-            string filePath = "C:\\Users\\scleu\\Downloads\\Clinic_A.rvt";
+            // Path to the folder containing Revit files
+            string folderPath = "C:\\Users\\scleu\\Downloads\\2024 Summer Research\\Revit Files";
+            // Path to the log file
+            string logFilePath = "C:\\Users\\scleu\\Downloads\\2024 Summer Research\\Dynamo_Revit_Log.txt";
 
             try
             {
@@ -21,17 +24,40 @@ namespace ClassLibrary1
                 UIDocument uiDoc = uiApp.ActiveUIDocument;
                 Application app = uiApp.Application;
 
-                // Open the Revit file
-                Document doc = app.OpenDocumentFile(filePath);
+                // Open the log file
+                using (StreamWriter writer = new StreamWriter(logFilePath, true))
+                {
+                    // Get all files in the folder
+                    string[] files = Directory.GetFiles(folderPath, "*.rvt");
 
-                // If the document was successfully opened
-                if (doc != null)
-                {
-                    TaskDialog.Show("Success", "Successfully opened Revit file: " + filePath);
-                }
-                else
-                {
-                    TaskDialog.Show("Error", "Failed to open Revit file: " + filePath);
+                    foreach (string filePath in files)
+                    {
+                        try
+                        {
+                            // Open the Revit file
+                            Document doc = app.OpenDocumentFile(filePath);
+
+                            // If the document was successfully opened
+                            if (doc != null)
+                            {
+                                TaskDialog.Show("Success", "Successfully opened Revit file: " + filePath);
+                                // Write success message to log file
+                                writer.WriteLine(DateTime.Now.ToString() + ": Successfully opened Revit file: " + filePath);
+                            }
+                            else
+                            {
+                                TaskDialog.Show("Error", "Failed to open Revit file: " + filePath);
+                                // Write error message to log file
+                                writer.WriteLine(DateTime.Now.ToString() + ": Failed to open Revit file: " + filePath);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            TaskDialog.Show("Error", "An error occurred: " + ex.Message);
+                            // Write error message to log file
+                            writer.WriteLine(DateTime.Now.ToString() + ": An error occurred: " + ex.Message);
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -44,6 +70,5 @@ namespace ClassLibrary1
     }
 }
 
-// Ensure Copy Local is set to False in the dependencies (Revit.API and Revit.APIUI) that should be installed
 
 // C:\\Users\\scleu\\Downloads\\Clinic_A.rvt
