@@ -1,9 +1,9 @@
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.ApplicationServices;
 using System;
 using System.IO;
+using Autodesk.Revit.ApplicationServices;
 
 namespace ClassLibrary2
 {
@@ -106,8 +106,14 @@ namespace ClassLibrary2
                                     saveChanges = true;
                                 }
 
+                                if (saveChanges)
+                                {
+                                    // Save the document outside of any active transaction
+                                    SaveDocument(doc, writer);
+                                }
+
                                 // Export to IFC using Autodesk.IFC.Export.UI
-                                ExportToIFC(doc, filePath);
+                                ExportToIFC(doc, filePath, writer);
                             }
                             else
                             {
@@ -126,16 +132,8 @@ namespace ClassLibrary2
                         }
                         finally
                         {
-                            // Ensure the document is closed if it was opened and save changes if necessary
-                            if (doc != null)
-                            {
-                                if (saveChanges)
-                                {
-                                    // Save the document
-                                    doc.Save();
-                                }
-                                doc.Close(false); // Close without saving changes again
-                            }
+                            // Ensure the document is closed if it was opened
+                            doc?.Close(false); // Close without saving changes again
                         }
                     }
                 }
@@ -198,6 +196,21 @@ namespace ClassLibrary2
             writer.WriteLine(DateTime.Now.ToString() + ": Failed to open Revit file: " + filePath);
         }
 
+        private void SaveDocument(Document doc, StreamWriter writer)
+        {
+            try
+            {
+                doc.Save();
+                writer.WriteLine(DateTime.Now.ToString() + ": Document saved successfully.");
+            }
+            catch (Exception ex)
+            {
+                TaskDialog.Show("Error", "An error occurred while saving the document: " + ex.Message);
+                writer.WriteLine(DateTime.Now.ToString() + ": An error occurred while saving the document: " + ex.Message);
+                writer.WriteLine(ex.StackTrace);
+            }
+        }
+
         // Implement this method to check for panel-circuit mismatch
         private bool CheckPanelCircuitMismatch(Document doc)
         {
@@ -218,15 +231,30 @@ namespace ClassLibrary2
         }
 
         // Implement this method to export the document to IFC
-        private void ExportToIFC(Document doc, string filePath)
+        private void ExportToIFC(Document doc, string filePath, StreamWriter writer)
         {
-            // Ensure the Autodesk.IFC.Export.UI reference is available
-            IFCExportOptions ifcOptions = new IFCExportOptions();
-            string ifcFilePath = Path.ChangeExtension(filePath, "ifc");
+            try
+            {
+                // Ensure the Autodesk.IFC.Export.UI reference is available
+                IFCExportOptions ifcOptions = new IFCExportOptions();
+                string ifcFilePath = Path.ChangeExtension(filePath, "ifc");
 
-            doc.Export(Path.GetDirectoryName(ifcFilePath), Path.GetFileName(ifcFilePath), ifcOptions);
+                using (Transaction exportTrans = new Transaction(doc, "Export IFC"))
+                {
+                    exportTrans.Start();
+                    doc.Export(Path.GetDirectoryName(ifcFilePath), Path.GetFileName(ifcFilePath), ifcOptions);
+                    exportTrans.Commit();
+                }
 
-            TaskDialog.Show("IFC Export", "IFC export completed for: " + ifcFilePath);
+                TaskDialog.Show("IFC Export", "IFC export completed for: " + ifcFilePath);
+                writer.WriteLine(DateTime.Now.ToString() + ": IFC export completed for: " + ifcFilePath);
+            }
+            catch (Exception ex)
+            {
+                TaskDialog.Show("Error", "An error occurred during IFC export: " + ex.Message);
+                writer.WriteLine(DateTime.Now.ToString() + ": An error occurred during IFC export for file " + filePath + ": " + ex.Message);
+                writer.WriteLine(ex.StackTrace);
+            }
         }
     }
 }
