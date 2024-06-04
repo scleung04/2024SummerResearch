@@ -229,10 +229,6 @@ namespace ClassLibrary2
 
         private void SuppressErrorsAndWarnings(Document doc, Action action)
         {
-            FailureHandlingOptions failureHandlingOptions = new FailureHandlingOptions()
-                .SetFailuresPreprocessor(new SimpleFailurePreprocessor())
-                .SetClearAfterRollback(true);
-
             using (TransactionGroup transGroup = new TransactionGroup(doc, "Suppress Errors and Warnings"))
             {
                 transGroup.Start();
@@ -241,14 +237,15 @@ namespace ClassLibrary2
                     using (Transaction trans = new Transaction(doc))
                     {
                         trans.Start();
-                        trans.GetFailureHandlingOptions().SetFailuresPreprocessor(new SimpleFailurePreprocessor());
                         action.Invoke();
                         trans.Commit();
                     }
                 }
                 catch (Exception ex)
                 {
-                    using (StreamWriter writer = new StreamWriter("C:\\Users\\scleu\\Downloads\\2024 Summer Research\\Dynamo_Revit_Log.txt", true))
+                    // Log the error to a file
+                    string logFilePath = "C:\\Users\\scleu\\Downloads\\2024 Summer Research\\Dynamo_Revit_Log.txt";
+                    using (StreamWriter writer = new StreamWriter(logFilePath, true))
                     {
                         writer.WriteLine($"{DateTime.Now}: An error occurred: {ex.Message}");
                         writer.WriteLine(ex.StackTrace);
@@ -257,6 +254,7 @@ namespace ClassLibrary2
                 transGroup.Assimilate();
             }
         }
+
 
         private class SimpleFailurePreprocessor : IFailuresPreprocessor
         {
