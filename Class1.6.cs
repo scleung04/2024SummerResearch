@@ -1,3 +1,5 @@
+// Doesn't currently work any better than 1.5
+
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Electrical;
