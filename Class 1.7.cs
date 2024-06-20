@@ -8,8 +8,6 @@ using System.IO;
 using System.Linq;
 using Autodesk.Revit.ApplicationServices;
 
-// Doesn't work for disconnecting circuit but can select IFC options
-
 namespace ClassLibrary2
 {
     [Transaction(TransactionMode.Manual)]
@@ -284,12 +282,52 @@ namespace ClassLibrary2
                 Phase phaseToExport = phases.get_Item(phases.Size - 1); // Export the last phase
                 ifcOptions.AddOption("ExportingPhase", phaseToExport.Id.IntegerValue.ToString());
 
-                // Additional options can be set using AddOption method
+                // Additional IFC export options
                 ifcOptions.AddOption("SplitWallsAndColumnsByLevel", "true");
+
+                // Tab 2
+                ifcOptions.AddOption("ExportRevitPropertySets", "true");
+                ifcOptions.AddOption("ExportIFCCommonPropertySets", "true");
+                ifcOptions.AddOption("ExportBaseQuantities", "true");
+
+                ifcOptions.AddOption("ExportSchedulesAsPsets", "true");
+
+                ifcOptions.AddOption("ExportUserDefinedPsets", "true");
+                ifcOptions.AddOption("ExportUserDefinedPsetsFile", "path_to_user_defined_psets_file.json");
+
+                ifcOptions.AddOption("ExportUserDefinedParameterMappingFile", "path_to_user_defined_parameter_mapping_file.txt");
+
+                // Tab 3
                 ifcOptions.AddOption("ExportPartsAsBuildingElements", "true");
-                ifcOptions.AddOption("VisibleElementsOfCurrentView", "false");
+
                 ifcOptions.AddOption("UseActiveViewGeometry", "false");
+
+                ifcOptions.AddOption("VisibleElementsOfCurrentView", "false");
+
                 ifcOptions.AddOption("UseCoarseTessellation", "false");
+                ifcOptions.AddOption("ExportAnnotations", "true");
+                ifcOptions.AddOption("ExportSpecificSchedules", "true");
+                ifcOptions.AddOption("ExportRoomsInView", "true");
+                ifcOptions.AddOption("ExportBoundingBox", "true");
+                ifcOptions.AddOption("ExportSolidModelRep", "true");
+                ifcOptions.AddOption("ExportLinkedFiles", "true");
+                ifcOptions.AddOption("ExportInternalRevitPropertySets", "true");
+                ifcOptions.AddOption("ExportRoomsInView", "true");
+                ifcOptions.AddOption("ExportUserDefinedParameterMapping", "true");
+                ifcOptions.AddOption("UseIFCBoundaryRepresentation", "true");
+                ifcOptions.AddOption("ExportAdvancedSweptSolids", "true");
+                ifcOptions.AddOption("Export2DElements", "true");
+                ifcOptions.AddOption("ExportBoundingBox", "true");
+                ifcOptions.AddOption("ExportInternalPropertySets", "true");
+                ifcOptions.AddOption("ExportExternalPropertySets", "true");
+                ifcOptions.AddOption("ExportBoundingBox", "true");
+                ifcOptions.AddOption("UseCoarseTessellation", "false");
+                ifcOptions.AddOption("ExportAllLevels", "true");
+
+                // Custom property sets and parameter mappings can be added by specifying file paths
+                ifcOptions.AddOption("ExportUserDefinedPsets", "true");
+                ifcOptions.AddOption("ExportUserDefinedPsetsFile", "C:\\Path\\To\\UserDefinedPsets.json");
+                ifcOptions.AddOption("ExportUserDefinedParameterMappingFile", "C:\\Path\\To\\UserDefinedParameterMapping.txt");
 
                 using (Transaction exportTrans = new Transaction(doc, "Export IFC"))
                 {
@@ -306,5 +344,6 @@ namespace ClassLibrary2
                 writer.WriteLine(ex.StackTrace);
             }
         }
+
     }
 }
