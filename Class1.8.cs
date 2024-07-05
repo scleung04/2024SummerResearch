@@ -270,16 +270,6 @@ namespace ClassLibrary2
                 string ifcFileName = Path.GetFileNameWithoutExtension(filePath) + ".ifc";
                 string ifcFilePath = Path.Combine(ifcFolderPath, ifcFileName);
 
-        private void ExportToIFC(Document doc, string filePath, StreamWriter writer)
-        {
-            try
-            {
-                string ifcFolderPath = "C:\\Users\\scleu\\Downloads\\2024 Summer Research\\R2024";
-                Directory.CreateDirectory(ifcFolderPath);
-
-                string ifcFileName = Path.GetFileNameWithoutExtension(filePath) + ".ifc";
-                string ifcFilePath = Path.Combine(ifcFolderPath, ifcFileName);
-
                 // Set up IFC export options
                 IFCExportOptions ifcOptions = new IFCExportOptions
                 {
